@@ -2,8 +2,7 @@
 Solución de prueba para puesto desarrollador python 
 # Desarrollador encargado
 Yulean Gabriel Rios Velandia-Ingeniero de Sistemas
-www.linkedin.com/in/ 
-yulean-gabriel-rios-velandia-554188207
+www.linkedin.com/in/yulean-gabriel-rios-velandia-554188207
 # Datos Calculador para el archivo de prueba mapa.txt
 La longitud de la ruta es la siguiente : 12
 La caída de la ruta calculada es : 1257.0
