@@ -19,26 +19,20 @@ class mejor_ruta:
     self.bajo=False
     self.encerrado=0
     self.encerradoHistorico=0
-    self.posiciones=[[]]
-    self.ruta_mas_larga=[]
+    self.ruta_mas_larga=[0,0]
+    self.ruta_mas_enpinada=[0,0]
+    self.posInicialX=0
+    self.posInicialY=0
 
-  def encontrar_todos_maximos(self):
-    self.posiciones=np.array(np.where(self.mapa == np.amax(self.mapa)))
-  
-  def tomar_posicion(self):
-    if (self.posiciones[1].shape != (0,)):
-      self.valory = self.posiciones[1][0] 
-    if (self.posiciones[0].shape != (0,)):
-      self.valorx = self.posiciones[0][0] 
 
   def reposicionar(self):
-    self.posiciones = np.array([np.delete(self.posiciones[0], 0),np.delete(self.posiciones[1], 0)])
+    self.valorx=self.posInicialX
+    self.valory=self.posInicialY
 
 
   def encontrar_maximo(self):
-    self.altitud=np.amax(self.mapa)
+    self.altitud=self.mapa[self.valorx][self.valory]
     self.ruta.append(self.altitud)
-    self.tomar_posicion()
     self.encerradoHistorico=self.encerradoHistorico+self.encerrado
 
   def hay_espacio_lados(self):
@@ -61,25 +55,25 @@ class mejor_ruta:
       hayArriba=False
     return hayAbajo, hayArriba
 
-  def ver_lados(self, altura):
+  def ver_lados(self):
     posibilidades={}
     ladoI,ladoD= self.hay_espacio_lados()
     ladoB,ladoA= self.hay_espacio_abajo()
 
     if ladoB:
-      abajo=abs(altura-self.mapa[self.valorx+1][self.valory])
+      abajo=abs(self.altitud-self.mapa[self.valorx+1][self.valory])
       posibilidades['abajo']=abajo
 
     if ladoA:
-      arriba=abs(altura-self.mapa[self.valorx-1][self.valory])
+      arriba=abs(self.altitud-self.mapa[self.valorx-1][self.valory])
       posibilidades['arriba']=arriba
 
     if ladoI:
-      izquierda=abs(altura-self.mapa[self.valorx][self.valory-1])
+      izquierda=abs(self.altitud-self.mapa[self.valorx][self.valory-1])
       posibilidades['izquierda']=izquierda
 
     if ladoD:
-      derecha=abs(altura-self.mapa[self.valorx][self.valory+1])
+      derecha=abs(self.altitud-self.mapa[self.valorx][self.valory+1])
       posibilidades['derecha']=derecha
 
     if self.encerrado > 0:
@@ -92,71 +86,81 @@ class mejor_ruta:
 
     return posibilidades
 
-  def mover(self):
-    
-    dicPosi=self.ver_lados(self.altitud)
-    moviendo=True
-    hayOpciones=len(dicPosi)
-    while (moviendo):
-      try:
-        mejorDescenso = min(dicPosi, key=dicPosi.get)
-        del dicPosi[mejorDescenso]
-        if mejorDescenso=='arriba' and self.mapa[self.valorx-1][self.valory] < self.altitud:
-          self.valorx=self.valorx-1
-          self.altitud=self.mapa[self.valorx][self.valory]
-          self.ruta.append(self.altitud)
-          self.encerrado=0
-          moviendo=False
-        elif mejorDescenso=='abajo' and self.mapa[self.valorx+1][self.valory] < self.altitud:
-          self.valorx=self.valorx+1
-          self.altitud=self.mapa[self.valorx][self.valory]
-          self.ruta.append(self.altitud)
-          self.encerrado=0
-          moviendo=False
-        elif mejorDescenso=='izquierda' and self.mapa[self.valorx][self.valory-1] < self.altitud:
-          self.valory=self.valory-1
-          self.altitud=self.mapa[self.valorx][self.valory]
-          self.ruta.append(self.altitud)
-          self.encerrado=0
-          moviendo=False
-        elif mejorDescenso=='derecha' and self.mapa[self.valorx][self.valory+1] < self.altitud: 
-          self.valory=self.valory+1
-          self.altitud=self.mapa[self.valorx][self.valory]
-          self.ruta.append(self.altitud)
-          self.encerrado=0
-          moviendo=False
-        
-      except :
-        if (hayOpciones >0):
-          self.encerrado=self.encerrado+1
-          self.encerrado=self.encerrado+self.encerradoHistorico
-          self.reinicio()
-          moviendo=False
-        else:
-          moviendo=False
-          self.reposicionar()
-          self.reinicio()
-          self.encerrado=0
-          self.encerradoHistorico=0
-          
+  def mover(self, posx, posy):
+    self.ruta=[]
+    self.valorx= posx
+    self.valory=posy
+    self.posInicialX=posx
+    self.posInicialY=posy
+    self.encontrar_maximo()
+    while (self.bajo==False):
+      dicPosi=self.ver_lados()
+      moviendo=True
+      hayOpciones=len(dicPosi)
+      while (moviendo):
+        try:
+          mejorDescenso = min(dicPosi, key=dicPosi.get)
+          del dicPosi[mejorDescenso]
+          if mejorDescenso=='arriba' and self.mapa[self.valorx-1][self.valory] < self.altitud:
+            self.valorx=self.valorx-1
+            self.altitud=self.mapa[self.valorx][self.valory]
+            self.ruta.append(self.altitud)
+            self.encerrado=0
+            moviendo=False
+          elif mejorDescenso=='abajo' and self.mapa[self.valorx+1][self.valory] < self.altitud:
+            self.valorx=self.valorx+1
+            self.altitud=self.mapa[self.valorx][self.valory]
+            self.ruta.append(self.altitud)
+            self.encerrado=0
+            moviendo=False
+          elif mejorDescenso=='izquierda' and self.mapa[self.valorx][self.valory-1] < self.altitud:
+            self.valory=self.valory-1
+            self.altitud=self.mapa[self.valorx][self.valory]
+            self.ruta.append(self.altitud)
+            self.encerrado=0
+            moviendo=False
+          elif mejorDescenso=='derecha' and self.mapa[self.valorx][self.valory+1] < self.altitud: 
+            self.valory=self.valory+1
+            self.altitud=self.mapa[self.valorx][self.valory]
+            self.ruta.append(self.altitud)
+            self.encerrado=0
+            moviendo=False
+        except :
+          if (hayOpciones >0):
+            self.encerrado=self.encerrado+1
+            self.encerrado=self.encerrado+self.encerradoHistorico
+            self.reposicionar()
+            self.reinicio()
+            moviendo=False
+          else:
+            self.bajo=True
+            moviendo=False
+            self.reposicionar()
+            self.reinicio()
+            self.encerrado=0
+            self.encerradoHistorico=0
+
   def reinicio(self):
+    descensoActual=self.ruta[0]-self.ruta[-1]
+    mejorDescenso=self.ruta_mas_larga[0]-self.ruta_mas_larga[-1]
     if (len(self.ruta) > len(self.ruta_mas_larga)):
       self.ruta_mas_larga=self.ruta
+    if (len(self.ruta) == len(self.ruta_mas_larga)):
+      if (descensoActual > mejorDescenso):
+        self.ruta_mas_larga=self.ruta
+        self.ruta_mas_enpinada=self.ruta
     self.ruta=[]
     self.encontrar_maximo()
 
-  def llego_al_suelo(self):
-    if self.posiciones.shape[1]==0 :
-        self.bajo=True
-    return self.bajo
-
 if __name__ =='__main__':
   La_mejor_ruta= mejor_ruta()
-  La_mejor_ruta.encontrar_todos_maximos()
-  La_mejor_ruta.encontrar_maximo()
-  while (La_mejor_ruta.llego_al_suelo()==False):
-    La_mejor_ruta.mover()
-    
+  for i in range(La_mejor_ruta.mapa.shape[0]):
+    for j in range(La_mejor_ruta.mapa.shape[1]):
+      La_mejor_ruta.bajo=False
+      La_mejor_ruta.mover(i,j)
+
+ 
+ 
   print(f'La longitud de la ruta es la siguiente : {len(La_mejor_ruta.ruta_mas_larga)}')
-  print(f'La caída de la ruta calculada es : {La_mejor_ruta.ruta_mas_larga[0]-La_mejor_ruta.ruta_mas_larga[-1]}')
-  print(f'La mejor Ruta encontrada es : {La_mejor_ruta.ruta_mas_larga}')
+  print(f'La caída de la ruta calculada es : {La_mejor_ruta.ruta_mas_larga[0] - La_mejor_ruta.ruta_mas_larga[-1]}')
+  print(f'La ruta mas larga es  : {La_mejor_ruta.ruta_mas_larga}')
